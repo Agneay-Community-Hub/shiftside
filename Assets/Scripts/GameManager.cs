@@ -3,9 +3,9 @@ using UnityEngine;
 
 /// SHIFTSIDE — a puzzle-platformer about two overlapping realities.
 /// Everything (camera, art, audio, levels, UI) is built from code by this component.
-public class GameManager : MonoBehaviour
+public partial class GameManager : MonoBehaviour
 {
-    enum State { Menu, Playing, Dying, Exiting, Ending }
+    enum State { Menu, Playing, Dying, Exiting, Ending, Card }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Boot()
@@ -49,6 +49,7 @@ public class GameManager : MonoBehaviour
     void Awake()
     {
         Application.targetFrameRate = 60;
+        TrailerInit();
         cam = Camera.main;
         if (cam == null)
         {
@@ -119,16 +120,16 @@ public class GameManager : MonoBehaviour
 
     // ------------------------------------------------------------------ input
 
-    static bool ShiftPressed() =>
+    static bool ShiftPressed() => Scripted ? sShift :
         Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift) ||
         Input.GetKeyDown(KeyCode.X) || Input.GetKeyDown(KeyCode.K) ||
         Input.GetKeyDown(KeyCode.JoystickButton1) || Input.GetKeyDown(KeyCode.JoystickButton2);
 
-    static bool JumpPressed() =>
+    static bool JumpPressed() => Scripted ? sJumpDown :
         Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow) ||
         Input.GetKeyDown(KeyCode.Z) || Input.GetKeyDown(KeyCode.JoystickButton0);
 
-    static bool JumpHeld() =>
+    static bool JumpHeld() => Scripted ? sJumpHeld :
         Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow) ||
         Input.GetKey(KeyCode.Z) || Input.GetKey(KeyCode.JoystickButton0);
 
@@ -138,6 +139,7 @@ public class GameManager : MonoBehaviour
 
     static float Horizontal()
     {
+        if (Scripted) return sIx;
         float h = 0;
         if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) h -= 1;
         if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) h += 1;
@@ -211,7 +213,7 @@ public class GameManager : MonoBehaviour
         camPos = ClampCam(player.pos);
     }
 
-    static bool HasShard(int level, int id) => PlayerPrefs.GetInt($"shard_{level}_{id}", 0) == 1;
+    static bool HasShard(int level, int id) => !Trailer && PlayerPrefs.GetInt($"shard_{level}_{id}", 0) == 1;
 
     static int ShardsOwned()
     {
@@ -229,7 +231,7 @@ public class GameManager : MonoBehaviour
         stateTimer = 0.85f;
         levelDeaths++;
         totalDeaths++;
-        PlayerPrefs.SetInt("deaths", totalDeaths);
+        if (!Trailer) PlayerPrefs.SetInt("deaths", totalDeaths);
         caption = msg;
         captionTimer = 1.8f;
         shake = 0.4f;
@@ -244,6 +246,7 @@ public class GameManager : MonoBehaviour
         stateTimer = 1.1f;
         sfx.Play(sfx.Win, 0.8f);
         Burst(lvl.ExitPos + Vector2.up, 30, Color.white, 6f, 1.2f);
+        if (Trailer) return;
         foreach (int id in pendingShards) PlayerPrefs.SetInt($"shard_{levelIndex}_{id}", 1);
         unlocked = Mathf.Clamp(Mathf.Max(unlocked, levelIndex + 2), 1, Levels.All.Length);
         PlayerPrefs.SetInt("unlocked", unlocked);
@@ -290,13 +293,17 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        float dt = Mathf.Min(Time.deltaTime, 1f / 30f);
+        float dt = Trailer ? 1f / 60f : Mathf.Min(Time.deltaTime, 1f / 30f);
         time += dt;
 
-        if (Input.GetKeyDown(KeyCode.M)) musicOn = !musicOn;
+        if (Trailer) TrailerTick(dt);
+        else if (Input.GetKeyDown(KeyCode.M)) musicOn = !musicOn;
 
         switch (state)
         {
+            case State.Card:
+                lvl.UpdateMonsters(dt);
+                break;
             case State.Menu: UpdateMenu(dt); break;
             case State.Playing: UpdatePlaying(dt); break;
             case State.Dying:
@@ -308,7 +315,7 @@ public class GameManager : MonoBehaviour
                 stateTimer -= dt;
                 player.pos = Vector2.Lerp(player.pos, lvl.ExitPos + new Vector2(0, 0.9f), 1 - Mathf.Exp(-dt * 8));
                 playerTr.localScale = Vector3.one * Mathf.Clamp01(stateTimer);
-                if (stateTimer <= 0)
+                if (stateTimer <= 0 && !Trailer)
                 {
                     if (levelIndex + 1 < Levels.All.Length) { levelIndex++; PlayerPrefs.SetInt("last", levelIndex); LoadLevel(false); }
                     else EnterEnding();
@@ -365,8 +372,8 @@ public class GameManager : MonoBehaviour
     {
         runTime += dt;
         shiftCd -= dt;
-        if (Input.GetKeyDown(KeyCode.Escape)) { EnterMenu(); return; }
-        if (Input.GetKeyDown(KeyCode.R)) { LoadLevel(activeCheckpoint >= 0); return; }
+        if (!Scripted && Input.GetKeyDown(KeyCode.Escape)) { EnterMenu(); return; }
+        if (!Scripted && Input.GetKeyDown(KeyCode.R)) { LoadLevel(activeCheckpoint >= 0); return; }
 
         if (ShiftPressed() && shiftCd <= 0) TryShift();
         if (state != State.Playing) return;
@@ -587,6 +594,13 @@ public class GameManager : MonoBehaviour
             case State.Exiting:
             {
                 float pad = 18 * u;
+                if (Trailer)
+                {
+                    Text(new Rect(W * 0.5f, pad, W * 0.5f - pad, 40 * u), world == 0 ? "SOL" : "UMBRA", 32 * u, Palette.World(world), TextAnchor.UpperRight, FontStyle.Bold);
+                    if (captionTimer > 0)
+                        Text(new Rect(W * 0.1f, H * 0.36f, W * 0.8f, 60 * u), caption, 34 * u, new Color(1, 1, 1, Mathf.Clamp01(captionTimer * 1.5f)), TextAnchor.MiddleCenter, FontStyle.Bold);
+                    break;
+                }
                 Text(new Rect(pad, pad, W * 0.6f, 34 * u), $"{levelIndex + 1} / {Levels.All.Length}   {lvl.Def.Name.ToUpperInvariant()}", 24 * u, Color.white, TextAnchor.UpperLeft, FontStyle.Bold);
                 string stats = $"Deaths {levelDeaths}";
                 if (lvl.Shards.Count > 0)
@@ -611,6 +625,9 @@ public class GameManager : MonoBehaviour
                     Text(new Rect(W * 0.1f, H * 0.36f, W * 0.8f, 60 * u), caption, 30 * u, new Color(1, 1, 1, Mathf.Clamp01(captionTimer * 1.5f)), TextAnchor.MiddleCenter, FontStyle.Bold);
                 break;
             }
+            case State.Card:
+                DrawCard(W, H, u, wc);
+                break;
             case State.Ending:
             {
                 Overlay(new Color(0, 0, 0, 0.35f));

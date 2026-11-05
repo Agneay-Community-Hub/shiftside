@@ -51,8 +51,14 @@ public class Sfx
         }
     }
 
+    /// Optional observer (used by trailer mode to rebuild the soundtrack offline).
+    public static Action<AudioClip, float, float> OnPlay;
+    public AudioClip MusicSolClip => musicSol.clip;
+    public AudioClip MusicUmbraClip => musicUmbra.clip;
+
     public void Play(AudioClip c, float vol = 1f, float pitch = 1f)
     {
+        OnPlay?.Invoke(c, vol, pitch);
         var s = pool[next];
         next = (next + 1) % pool.Length;
         s.clip = c;
