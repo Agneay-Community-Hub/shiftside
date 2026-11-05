@@ -38,7 +38,7 @@ public static class BuildScript
     {
         PlayerSettings.companyName = "Agneay B Nair";
         PlayerSettings.productName = "Shiftside";
-        PlayerSettings.runInBackground = true;
+        PlayerSettings.runInBackground = false; // pause (and go silent) when not focused
         PlayerSettings.defaultWebScreenWidth = 960;
         PlayerSettings.defaultWebScreenHeight = 540;
         PlayerSettings.defaultScreenWidth = 1280;

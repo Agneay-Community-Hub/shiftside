@@ -282,6 +282,10 @@ public class GameManager : MonoBehaviour
             Die("The other world had spikes there.");
     }
 
+    // Go quiet when the window/tab isn't focused, and resume when it comes back.
+    void OnApplicationFocus(bool focused) => AudioListener.pause = !focused;
+    void OnApplicationPause(bool paused) => AudioListener.pause = paused;
+
     // ------------------------------------------------------------------ loop
 
     void Update()
