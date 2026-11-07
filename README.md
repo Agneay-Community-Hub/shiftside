@@ -2,9 +2,42 @@
 
 > *That broken bridge might exist in the other world. Unfortunately, so might the monster standing on it.*
 
+[![Latest release](https://img.shields.io/github/v/release/Agneay-Community-Hub/shiftside?label=download&color=ff9e48)](https://github.com/Agneay-Community-Hub/shiftside/releases/latest)
+[![Game Off 2026](https://img.shields.io/badge/GitHub%20Game%20Off-2026-55ccff)](https://itch.io/jam/game-off-2026)
+[![Unity 6](https://img.shields.io/badge/Unity-6000.4-222)](https://unity.com)
+[![License: MIT](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
+
+<p align="center">
+  <img src="docs/media/preview.gif" alt="Climbing Ghost Steps by shifting between SOL and UMBRA in mid-air" width="640">
+</p>
+
 A puzzle-platformer about two overlapping realities, made for **[GitHub Game Off 2026](https://itch.io/jam/game-off-2026)**. The theme is **SHIFT**.
 
 You can shift at any moment between **SOL**, a warm daytime world, and **UMBRA**, a cool night-time one. Both worlds share the same space, but each has its own ground, walls, spikes and residents. You always see the other world as faint ghosts, so you can plan ahead. Things that exist only there can't touch you until you join them.
+
+## Trailer
+
+<p align="center">
+  <a href="https://github.com/Agneay-Community-Hub/shiftside/releases/download/v1.0.1/Shiftside-Trailer-1080p60.mp4">
+    <img src="docs/media/trailer-thumbnail.jpg" alt="Watch the SHIFTSIDE trailer" width="640">
+  </a>
+  <br>
+  <sub>73 seconds · 1080p60 · all real gameplay</sub>
+</p>
+
+## Download & play
+
+| Platform | Get it |
+|---|---|
+| **Windows** (64-bit) | [**Shiftside-v1.0.1-windows-x64.zip**](https://github.com/Agneay-Community-Hub/shiftside/releases/download/v1.0.1/Shiftside-v1.0.1-windows-x64.zip). Unzip it, then run `Shiftside/Shiftside.exe`. |
+| **Browser** (WebGL) | Play on itch.io *(link coming soon)*, or download [Shiftside-v1.0.1-webgl.zip](https://github.com/Agneay-Community-Hub/shiftside/releases/download/v1.0.1/Shiftside-v1.0.1-webgl.zip) and serve the folder locally. |
+
+All versions are on the [Releases page](https://github.com/Agneay-Community-Hub/shiftside/releases). Windows may show a SmartScreen warning because the game isn't code-signed: click **More info → Run anyway**.
+
+<p align="center">
+  <img src="docs/media/screenshot-shift.jpg" alt="Shifting worlds mid-air on Ghost Steps" width="49%">
+  <img src="docs/media/screenshot-unfortunately.jpg" alt="Unfortunately, so was the monster." width="49%">
+</p>
 
 ## How to play
 
@@ -68,7 +101,7 @@ Assets/
 WebGL output goes to `Builds/WebGL`. Zip the **contents** of that folder (`index.html` must be at the root of the zip) and upload it to itch.io as an HTML game, with "This file will be played in the browser" checked. The build uses Gzip with decompression fallback, which itch.io supports.
 
 ## Jam submission checklist
-- [ ] Push this project to a **public GitHub repository** before **December 1, 2026, 13:37 PST**
+- [x] Push this project to a **public GitHub repository** before **December 1, 2026, 13:37 PST**
 - [ ] Upload the WebGL zip to itch.io and submit it to the Game Off 2026 jam page
 - [ ] Link the repo from the itch.io page
 
